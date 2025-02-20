@@ -1,0 +1,373 @@
+﻿{
+  "Scenario": "Regression",
+  "DataSource": {
+    "Type": "TabularFile",
+    "Version": 1,
+    "FilePath": "C:\\Users\\ricky\\source\\repos\\GarminR10DataViewer\\GolfShotML\\ML Data\\MaxHeight-TrainingData.csv",
+    "Delimiter": ",",
+    "DecimalMarker": ".",
+    "HasHeader": true,
+    "ColumnProperties": [
+      {
+        "ColumnName": "BallSpeedMPS",
+        "ColumnPurpose": "Feature",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 4
+      },
+      {
+        "ColumnName": "VerticalLaunchAngleDeg",
+        "ColumnPurpose": "Feature",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 4
+      },
+      {
+        "ColumnName": "HorizontalLaunchAngleDeg",
+        "ColumnPurpose": "Feature",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 4
+      },
+      {
+        "ColumnName": "SpinRateRPM",
+        "ColumnPurpose": "Feature",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 4
+      },
+      {
+        "ColumnName": "SpinAxisDeg",
+        "ColumnPurpose": "Feature",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 4
+      },
+      {
+        "ColumnName": "MaxHeightM",
+        "ColumnPurpose": "Label",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 4
+      }
+    ]
+  },
+  "Environment": {
+    "Type": "LocalCPU",
+    "Version": 1
+  },
+  "RunHistory": {
+    "Version": 3,
+    "Type": "Result",
+    "Trials": [
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "LightGbmRegression",
+        "Score": 0.99127949588488229,
+        "RuntimeInSeconds": 3.637,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e2",
+          "e0": {
+            "OutputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ],
+            "InputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ]
+          },
+          "e1": {
+            "InputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ],
+            "OutputColumnName": "Features"
+          },
+          "e2": {
+            "NumberOfLeaves": 4,
+            "MinimumExampleCountPerLeaf": 29,
+            "LearningRate": 0.020857085604848315,
+            "NumberOfTrees": 1820,
+            "SubsampleFraction": 0.57678262537144076,
+            "MaximumBinCountPerFeature": 177,
+            "FeatureFraction": 0.99999999,
+            "L1Regularization": 2E-10,
+            "L2Regularization": 0.99999977667298645,
+            "LabelColumnName": "MaxHeightM",
+            "FeatureColumnName": "Features"
+          },
+          "e3": {
+            "L1Regularization": 1.0,
+            "L2Regularization": 1.0,
+            "LabelColumnName": "MaxHeightM",
+            "FeatureColumnName": "Features"
+          }
+        }
+      },
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "LightGbmRegression",
+        "Score": 0.96979424303281636,
+        "RuntimeInSeconds": 12.847,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e2",
+          "e0": {
+            "OutputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ],
+            "InputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ]
+          },
+          "e1": {
+            "InputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ],
+            "OutputColumnName": "Features"
+          },
+          "e2": {
+            "NumberOfLeaves": 2360,
+            "MinimumExampleCountPerLeaf": 20,
+            "LearningRate": 0.99999977667298645,
+            "NumberOfTrees": 279,
+            "SubsampleFraction": 0.41474817785062529,
+            "MaximumBinCountPerFeature": 301,
+            "FeatureFraction": 0.99999999,
+            "L1Regularization": 2E-10,
+            "L2Regularization": 0.23683592399521966,
+            "LabelColumnName": "MaxHeightM",
+            "FeatureColumnName": "Features"
+          },
+          "e3": {
+            "L1Regularization": 1.0,
+            "L2Regularization": 1.0,
+            "LabelColumnName": "MaxHeightM",
+            "FeatureColumnName": "Features"
+          }
+        }
+      },
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "LbfgsPoissonRegressionRegression",
+        "Score": 0.8304626182966881,
+        "RuntimeInSeconds": 0.191,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e3",
+          "e0": {
+            "OutputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ],
+            "InputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ]
+          },
+          "e1": {
+            "InputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ],
+            "OutputColumnName": "Features"
+          },
+          "e3": {
+            "L1Regularization": 114.144424,
+            "L2Regularization": 1486.55127,
+            "LabelColumnName": "MaxHeightM",
+            "FeatureColumnName": "Features"
+          },
+          "e2": {
+            "NumberOfLeaves": 4,
+            "MinimumExampleCountPerLeaf": 20,
+            "LearningRate": 1.0,
+            "NumberOfTrees": 4,
+            "SubsampleFraction": 1.0,
+            "MaximumBinCountPerFeature": 255,
+            "FeatureFraction": 1.0,
+            "L1Regularization": 2E-10,
+            "L2Regularization": 1.0,
+            "LabelColumnName": "MaxHeightM",
+            "FeatureColumnName": "Features"
+          }
+        }
+      },
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "LbfgsPoissonRegressionRegression",
+        "Score": 0.826231756006955,
+        "RuntimeInSeconds": 0.127,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e3",
+          "e0": {
+            "OutputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ],
+            "InputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ]
+          },
+          "e1": {
+            "InputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ],
+            "OutputColumnName": "Features"
+          },
+          "e3": {
+            "L1Regularization": 117.258919,
+            "L2Regularization": 2.903589,
+            "LabelColumnName": "MaxHeightM",
+            "FeatureColumnName": "Features"
+          },
+          "e2": {
+            "NumberOfLeaves": 4,
+            "MinimumExampleCountPerLeaf": 20,
+            "LearningRate": 1.0,
+            "NumberOfTrees": 4,
+            "SubsampleFraction": 1.0,
+            "MaximumBinCountPerFeature": 255,
+            "FeatureFraction": 1.0,
+            "L1Regularization": 2E-10,
+            "L2Regularization": 1.0,
+            "LabelColumnName": "MaxHeightM",
+            "FeatureColumnName": "Features"
+          }
+        }
+      },
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "LbfgsPoissonRegressionRegression",
+        "Score": 0.82620415755558763,
+        "RuntimeInSeconds": 0.146,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e3",
+          "e0": {
+            "OutputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ],
+            "InputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ]
+          },
+          "e1": {
+            "InputColumnNames": [
+              "BallSpeedMPS",
+              "VerticalLaunchAngleDeg",
+              "HorizontalLaunchAngleDeg",
+              "SpinRateRPM",
+              "SpinAxisDeg"
+            ],
+            "OutputColumnName": "Features"
+          },
+          "e3": {
+            "L1Regularization": 6.9369936,
+            "L2Regularization": 0.137534261,
+            "LabelColumnName": "MaxHeightM",
+            "FeatureColumnName": "Features"
+          },
+          "e2": {
+            "NumberOfLeaves": 4,
+            "MinimumExampleCountPerLeaf": 20,
+            "LearningRate": 1.0,
+            "NumberOfTrees": 4,
+            "SubsampleFraction": 1.0,
+            "MaximumBinCountPerFeature": 255,
+            "FeatureFraction": 1.0,
+            "L1Regularization": 2E-10,
+            "L2Regularization": 1.0,
+            "LabelColumnName": "MaxHeightM",
+            "FeatureColumnName": "Features"
+          }
+        }
+      }
+    ],
+    "Estimators": {
+      "e0": "ReplaceMissingValues",
+      "e1": "Concatenate",
+      "e2": "LightGbmRegression",
+      "e3": "LbfgsPoissonRegressionRegression"
+    },
+    "Schema": "e0 * e1 * (e2 + e3)",
+    "MetricName": "RSquared",
+    "ModelFilePath": "C:\\Users\\ricky\\source\\repos\\GarminR10DataViewer\\GolfShotML\\ML_Models\\MaxHeightML.mlnet"
+  },
+  "Type": "TrainingConfig",
+  "Version": 4,
+  "TrainingOption": {
+    "Version": 1,
+    "Type": "RegressionTrainingOption",
+    "TrainingTime": 30,
+    "OptimizeMetric": "RSquared",
+    "LabelColumn": "MaxHeightM",
+    "AvailableTrainers": [
+      "LBFGS",
+      "LGBM"
+    ],
+    "ValidationOption": {
+      "Version": 0,
+      "Type": "CrossValidationValidationOption",
+      "NumberOfFolds": 5
+    }
+  }
+}

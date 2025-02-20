@@ -1,0 +1,511 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"    
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:self="clr-namespace:GarminR10DataViewer"
+             xmlns:controls="clr-namespace:GarminR10DataViewer.Controls"
+             xmlns:converters="clr-namespace:GarminR10DataViewer.Converters"
+             x:Class="GarminR10DataViewer.MainPage">
+
+    <ContentPage.Resources>
+        <toolkit:BoolToObjectConverter x:Key="BoolToVisibilityConverter" TrueObject="true" FalseObject="false" />
+        <toolkit:IsNotNullConverter x:Key="IsNotNullConverter" />
+        
+        <converters:MetricValueConverter x:Key="ZeroDecimalsMetricValueConverter" Decimals="0"/>
+        <converters:MetricValueConverter x:Key="MetricValueConverter"/>
+        <converters:MetricValueConverter x:Key="SmallMetricValueConverter" Decimals="2"/>
+
+        <converters:MetricValueConverter x:Key="DegreeMetricConverter" UnitSymbol="°"/>
+        <converters:MetricValueConverter x:Key="DirectionalDegreeMetricConverter" IsDirectional="True" UnitSymbol="°"/>
+
+        <converters:MetricValueConverter x:Key="DirectionalMetricValueConverter" IsDirectional="True"/>
+        <converters:MetricValueConverter x:Key="ZeroDecimalsDirectionalMetricValueConverter" Decimals="0" IsDirectional="True"/>
+
+        <converters:EnumTitleCaseNameConverter x:Key="EnumTitleCaseNameConverter"/>
+
+        <Style x:Key="MetricValueStyle" TargetType="Label">
+            <Setter Property="Label.FontSize" Value="34" />
+            <Setter Property="Label.FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="Label.VerticalTextAlignment" Value="Center" />
+            <Setter Property="Label.HorizontalTextAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SmallMetricValueStyle" TargetType="Label">
+            <Setter Property="Label.FontSize" Value="26" />
+            <Setter Property="Label.FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="Label.VerticalTextAlignment" Value="Center" />
+            <Setter Property="Label.HorizontalTextAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="MetricCardStyle" TargetType="Border">
+            <Setter Property="Border.BackgroundColor" Value="DarkCyan" />
+            <Setter Property="Border.StrokeShape" Value="RoundRectangle 10,10,10,10" />
+            <Setter Property="Border.Padding" Value="2" />
+            <Setter Property="Border.Margin" Value="1" />
+            <Setter Property="Border.HeightRequest" Value="70" />
+            <Setter Property="Border.WidthRequest" Value="170" />
+        </Style>
+    </ContentPage.Resources>
+    
+    <ScrollView>
+        <VerticalStackLayout Padding="30,0" Spacing="25">
+
+            <Border BackgroundColor="Purple" StrokeShape="RoundRectangle 10,10,10,10" Padding="5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <HorizontalStackLayout FlexLayout.Grow="1" HorizontalOptions="Start">
+                        <RadioButton GroupName="TabBtns" x:Name="FirstTab" IsChecked="true" Content="Settings" />
+
+                        <RadioButton GroupName="TabBtns" x:Name="SecondTab" Content="Current Shot"/>
+
+                        <RadioButton GroupName="TabBtns" x:Name="ThirdTab" Content="All Shots"/>
+                    </HorizontalStackLayout>
+                </Grid>
+            </Border>
+
+            <VerticalStackLayout IsVisible="{Binding Source={x:Reference FirstTab},Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Label Text="Connect your launch monitor" Style="{StaticResource SubHeadline}" VerticalOptions="Center" HorizontalOptions="Center" />
+
+                <HorizontalStackLayout HorizontalOptions="Center" Margin="0,10">
+                    <Button x:Name="ConnectBtn" Text="Connect to Garmin R10" SemanticProperties.Hint="Connect to a Garmin R10 device" Clicked="ConnectBtnClicked"/>
+
+                    <Button x:Name="DisconnectBtn" Text="Disconnect" IsVisible="False" SemanticProperties.Hint="Disconnect from Garmin R10 device" Clicked="DisconnectBtnClicked" />
+                    
+                    <Button x:Name="TestConnBtn" Text="Test Connection" Clicked="TestConnectionBtnClicked" Margin="10,0,0,0"/>
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Label Text="Connection status:"/>
+                    <Label x:Name="StatusTbx" Text="Disconnected" Margin="10,0" />
+                    <Label Text="Device status:" Margin="10,0" />
+                    <Border x:Name="ReadyStatusIcon" WidthRequest="10" HeightRequest="10" BackgroundColor="Red" />
+                    <Label x:Name="ReadyStatusTbx" Text="Not Ready" Margin="10,0" />
+                </HorizontalStackLayout>
+
+                <Label Text="Settings" Style="{StaticResource SubHeadline}" VerticalOptions="Center" HorizontalOptions="Center" Margin="0,10" />
+
+                <HorizontalStackLayout>
+                    <Label Text="Units" VerticalOptions="Center" Margin="0,-9,10,0" FontFamily="OpenSansSemibold" FontSize="18"/>
+
+                    <RadioButton GroupName="UnitBtns" x:Name="MetricTab" IsChecked="true" Content="Metric" CheckedChanged="MetricTab_CheckedChanged" VerticalOptions="Center"/>
+
+                    <RadioButton GroupName="UnitBtns" x:Name="ImperialTab" Content="Imperial" CheckedChanged="ImperialTab_CheckedChanged" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+
+                <Label Text="Spin Multiplier options"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout IsVisible="{Binding Source={x:Reference SecondTab},Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                <FlexLayout Direction="Row" JustifyContent="Center" Wrap="Wrap">
+
+                    <VerticalStackLayout WidthRequest="{Binding MetricsPanelWidth}">
+                        <Label Text="Machine Learning Predictions" VerticalOptions="CenterAndExpand" HorizontalOptions="Center" Style="{StaticResource SubHeadline}" IsVisible="{Binding Path=CurrentShotMLPredictions, Converter={StaticResource IsNotNullConverter}}" />
+
+                        <FlexLayout Direction="Row" JustifyContent="Center" Wrap="Wrap" IsVisible="{Binding Path=CurrentShotMLPredictions, Converter={StaticResource IsNotNullConverter}}">
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShotMLPredictions.CarryDistance, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Carry Distance" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShotMLPredictions.CarryDistance, Converter={StaticResource ZeroDecimalsMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShotMLPredictions.CarryDistanceOffline, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Carry Offline" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShotMLPredictions.CarryDistanceOffline, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShotMLPredictions.TotalDistance, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Total Distance" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShotMLPredictions.TotalDistance, Converter={StaticResource ZeroDecimalsMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShotMLPredictions.TotalDistanceOffline, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Total Offline" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShotMLPredictions.TotalDistanceOffline, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShotMLPredictions.MaxHeight, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Max Height" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShotMLPredictions.MaxHeight, Converter={StaticResource ZeroDecimalsMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.HeightUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShotMLPredictions.MaxHeightDistance, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Max Height Distance" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShotMLPredictions.MaxHeightDistance, Converter={StaticResource ZeroDecimalsMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShotMLPredictions.MaxHeightDistanceOffline, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Max Height Offline" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShotMLPredictions.MaxHeightDistanceOffline, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShotMLPredictions.DescentAngle, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Angle of Decent" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShotMLPredictions.DescentAngle, Converter={StaticResource DegreeMetricConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShotMLPredictions.BallSpeedAtImpact, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Ball Speed at Impact" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShotMLPredictions.BallSpeedAtImpact, Converter={StaticResource MetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.SpeedUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShotMLPredictions.FlightTime, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Flight time" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShotMLPredictions.FlightTime.TotalSeconds, Converter={StaticResource SmallMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="Seconds" VerticalOptions="Center" Margin="5,0,0,0" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </FlexLayout>   
+
+                        <Label Text="Launch Monitor Data" Style="{StaticResource SubHeadline}" Margin="10" IsVisible="{Binding Path=CurrentShot, Converter={StaticResource IsNotNullConverter}}"/>
+
+                        <FlexLayout Direction="Row" JustifyContent="Center" Wrap="Wrap" IsVisible="{Binding Path=CurrentShot, Converter={StaticResource IsNotNullConverter}}">
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.BallSpeed, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Ball Speed" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.BallSpeed, Converter={StaticResource MetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.SpeedUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.ClubSpeed, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Club Speed" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.ClubSpeed, Converter={StaticResource MetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.SpeedUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.SmashFactor, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Smash Factor" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.SmashFactor, Converter={StaticResource SmallMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.VerticalLaunchAngle, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Vertical Launch Angle" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.VerticalLaunchAngle, Converter={StaticResource DegreeMetricConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.HorizontalLaunchAngle, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Horizontal Launch Angle" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.HorizontalLaunchAngle, Converter={StaticResource DirectionalDegreeMetricConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.SpinRate, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Spin Rate - RPM" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.SpinRate, Converter={StaticResource ZeroDecimalsMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.SpinAxis, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Spin Axis" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.SpinAxis, Converter={StaticResource DirectionalDegreeMetricConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.BackSpin, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Back Spin - RPM" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.BackSpin, Converter={StaticResource ZeroDecimalsMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.SideSpin, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Side Spin - RPM" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.SideSpin, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.AngleOfAttack, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Attack Angle" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.AngleOfAttack, Converter={StaticResource DegreeMetricConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.CarryDistance, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Carry Distance" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.CarryDistance, Converter={StaticResource ZeroDecimalsMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.CarryDistanceOffline, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Carry Offline" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.CarryDistanceOffline, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.TotalDistance, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Total Distance" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.TotalDistance, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.TotalDistanceOffline, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Total Offline" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.TotalDistanceOffline, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.MaxHeight, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Max Height" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.MaxHeight, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.HeightUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.MaxHeightDistance, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Max Height Distance" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.MaxHeightDistance, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.MaxHeightDistanceOffline, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Max Height Offline" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.MaxHeightDistanceOffline, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.DistanceUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.DescentAngle, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Angle of Decent" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.DescentAngle, Converter={StaticResource DegreeMetricConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.BallSpeedAtImpact, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Ball Speed at Impact" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.BallSpeedAtImpact, Converter={StaticResource MetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="{Binding Path=CurrentShot.SpeedUnits}" VerticalOptions="Center" Margin="5,0,0,0"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.FlightTime, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Flight time" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.FlightTime, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="Seconds" VerticalOptions="Center" Margin="5,0,0,0" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.FaceToTarget, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Face to Target" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.FaceToTarget, Converter={StaticResource DirectionalDegreeMetricConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.ClubPath, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Club Path" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.ClubPath, Converter={StaticResource DirectionalDegreeMetricConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.BackswingTime, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Backswing Duration" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.BackswingTime.TotalSeconds, Converter={StaticResource SmallMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="Seconds" VerticalOptions="Center" Margin="5,0,0,0" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.DownswingTime, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Downswing Duration" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Path=CurrentShot.DownswingTime.TotalSeconds, Converter={StaticResource SmallMetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                        <Label Text="Seconds" VerticalOptions="Center" Margin="5,0,0,0" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.Tempo, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Tempo" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.Tempo, Converter={StaticResource MetricValueConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.FacePath, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Face Path" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.FacePath, Converter={StaticResource DirectionalDegreeMetricConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.DynamicLoft, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Dynamic Loft" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.DynamicLoft, Converter={StaticResource DirectionalDegreeMetricConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.SpinLoft, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Spin Loft" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.SpinLoft, Converter={StaticResource DirectionalDegreeMetricConverter}, FallbackValue='-'}" Style="{StaticResource MetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.ShotShape, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Shot Shape" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.ShotShape, Converter={StaticResource EnumTitleCaseNameConverter}, FallbackValue='-'}" Style="{StaticResource SmallMetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.FacePathType, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Face Path Type" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.FacePathType, Converter={StaticResource EnumTitleCaseNameConverter}, FallbackValue='-'}" Style="{StaticResource SmallMetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.SpinMethod, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Spin Method" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.SpinMethod, Converter={StaticResource EnumTitleCaseNameConverter}, FallbackValue='-'}" Style="{StaticResource SmallMetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MetricCardStyle}" IsVisible="{Binding Path=CurrentShot.SwingType, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout>
+                                    <Label Text="Swing Type" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Path=CurrentShot.SwingType, Converter={StaticResource EnumTitleCaseNameConverter}, FallbackValue='-'}" Style="{StaticResource SmallMetricValueStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </FlexLayout>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout WidthRequest="400" Margin="10">
+                        <Button x:Name="TestBtn" Text="Test Shot" Clicked="TestBtnClicked" HorizontalOptions="Center" Margin="10" />
+                        <controls:ShotProfileView Shot="{Binding CurrentShotMLPredictions}" HorizontalOptions="FillAndExpand" VerticalOptions="Start"  />                  
+                    </VerticalStackLayout>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <Grid IsVisible="{Binding Source={x:Reference ThirdTab},Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="45"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="420"/>
+                </Grid.ColumnDefinitions>
+                
+                <Label Text="Shot Table" VerticalOptions="CenterAndExpand" HorizontalOptions="Center" Style="{StaticResource SubHeadline}" />
+
+                <Button x:Name="ExportBtn" Text="Export" Clicked="ExportBtnClicked" HorizontalOptions="End" />
+
+                <ScrollView x:Name="ShotTable" HorizontalScrollBarVisibility="Always" Orientation="Both" Grid.Row="1" MaximumHeightRequest="{Binding MetricsTableHeight}">
+                    <material:DataGrid x:Name="DataGrid" ItemsSource="{Binding Shots}">
+                        <material:DataGrid.Columns>
+                            <material:DataGridColumn Binding="{Binding ShotNumber}" Title="Shot Number"/>
+                            <material:DataGridColumn Binding="{Binding Path=Units, Converter={StaticResource EnumTitleCaseNameConverter}}" Title="Units"/>
+
+                            <material:DataGridColumn Binding="{Binding Path=ClubSpeed, Converter={StaticResource SmallMetricValueConverter}}" Title="Club Speed"/>
+                            <material:DataGridColumn Binding="{Binding Path=BallSpeed, Converter={StaticResource SmallMetricValueConverter}}" Title="Ball Speed"/>
+                            <material:DataGridColumn Binding="{Binding Path=SmashFactor, Converter={StaticResource MetricValueConverter}}" Title="Smash Factor"/>
+
+                            <material:DataGridColumn Binding="{Binding Path=CarryDistance, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}}" Title="Carry Distance" />
+                            <material:DataGridColumn Binding="{Binding Path=TotalDistance, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}}" Title="Total Distance" />
+
+                            <material:DataGridColumn Binding="{Binding Path=CarryDistanceOffline, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}}" Title="Carry Distance Offline" />
+                            <material:DataGridColumn Binding="{Binding Path=TotalDistanceOffline, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}}" Title="Total Distance Offline" />
+
+                            <material:DataGridColumn Binding="{Binding Path=MaxHeight, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}}" Title="Max Height" />
+                            <material:DataGridColumn Binding="{Binding Path=MaxHeightDistance, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}}" Title="Max Height Distance" />
+                            <material:DataGridColumn Binding="{Binding Path=MaxHeightDistanceOffline, Converter={StaticResource ZeroDecimalsDirectionalMetricValueConverter}}" Title="Max Height Distance Offline" />
+
+
+                            <material:DataGridColumn Binding="{Binding Path=HorizontalLaunchAngle, Converter={StaticResource DirectionalDegreeMetricConverter}}" Title="HLA"/>
+                            <material:DataGridColumn Binding="{Binding Path=VerticalLaunchAngle, Converter={StaticResource DegreeMetricConverter}}" Title="VLA"/>
+                            <material:DataGridColumn Binding="{Binding Path=AngleOfAttack, Converter={StaticResource DegreeMetricConverter}}" Title="Attack Angle"/>
+                            <material:DataGridColumn Binding="{Binding Path=DescentAngle, Converter={StaticResource DegreeMetricConverter}}" Title="Descent Angle"/>
+
+                            <material:DataGridColumn Binding="{Binding Path=BackswingTime.TotalSeconds, Converter={StaticResource SmallMetricValueConverter}}" Title="Backswing Time"/>
+                            <material:DataGridColumn Binding="{Binding Path=DownswingTime.TotalSeconds, Converter={StaticResource SmallMetricValueConverter}}" Title="Downswing Time"/>
+                            <material:DataGridColumn Binding="{Binding Path=Tempo, Converter={StaticResource MetricValueConverter}}" Title="Tempo"/>
+
+                            <material:DataGridColumn Binding="{Binding Path=SpinRate, Converter={StaticResource ZeroDecimalsMetricValueConverter}}" Title="Total Spin"/>
+                            <material:DataGridColumn Binding="{Binding Path=SpinAxis, Converter={StaticResource DegreeMetricConverter}}" Title="Spin Axis"/>
+                            <material:DataGridColumn Binding="{Binding Path=BackSpin, Converter={StaticResource ZeroDecimalsMetricValueConverter}}" Title="Back Spin"/>
+                            <material:DataGridColumn Binding="{Binding Path=SideSpin, Converter={StaticResource ZeroDecimalsMetricValueConverter}}" Title="Side Spin"/>
+
+
+                            <material:DataGridColumn Binding="{Binding Path=BallSpeedAtImpact, Converter={StaticResource SmallMetricValueConverter}}" Title="Ball Speed At Impact"/>
+                            <material:DataGridColumn Binding="{Binding Path=FlightTime.TotalSeconds, Converter={StaticResource SmallMetricValueConverter}}" Title="Flight Time"/>
+                            <material:DataGridColumn Binding="{Binding Path=ShotShape, Converter={StaticResource EnumTitleCaseNameConverter}}" Title="Shot Shape"/>
+                            <material:DataGridColumn Binding="{Binding Path=SpinMethod, Converter={StaticResource EnumTitleCaseNameConverter}}" Title="Spin Method"/>
+                            <material:DataGridColumn Binding="{Binding Path=FacePathType, Converter={StaticResource EnumTitleCaseNameConverter}}" Title="Face Path Type"/>
+                            <material:DataGridColumn Binding="{Binding Path=ShotShape, Converter={StaticResource EnumTitleCaseNameConverter}}" Title="Shot Shape"/>
+                        </material:DataGrid.Columns>
+                    </material:DataGrid>
+                </ScrollView>
+
+                <VerticalStackLayout Grid.Column="1" Grid.RowSpan="2">
+                    <Picker SelectedItem="{Binding Source={x:Reference ShotClusterView},Path=SelectedItem}" ItemsSource="{Binding Source={x:Reference ShotClusterView},Path=ClusterProperties}"
+                            SelectedIndex="0" Margin="10" WidthRequest="200"/>
+
+                    <controls:ShotClusterView x:Name="ShotClusterView" Shots="{Binding Shots}" />
+                </VerticalStackLayout>                
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
