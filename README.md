@@ -17,6 +17,8 @@ I've also included an export button for the data that saves the data as a CSV fi
 
 ![Table of shot data](assets/GarminR10ViewerAppScreenshot2.png)
 
+Note: In the table view, for shot numbers, "test" shots are given negative numbers while shots made via the launch monitor will have positive numbers. 
+
 ## Challenges and learnings
 
 This is an experimental project mainly for my own learnings. 
